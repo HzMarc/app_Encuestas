@@ -1,114 +1,155 @@
 package com.example.app_encuestas;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.viewpager2.widget.ViewPager2;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
-    private DrawerLayout drawerLayout;
-    private TextView tvGreeting;
-    private TextView tvHeaderName;
-    private TextView tvHeaderEmail;
-    private TextView tvHeaderAvatar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_main);
 
-        drawerLayout = findViewById(R.id.drawerLayout);
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        NavigationView navView = findViewById(R.id.navView);
-        tvGreeting = findViewById(R.id.tvGreeting);
+        setupToolbarMenu();
+        ((TextView) findViewById(R.id.tvActiveCount)).setText("12");
+        ((TextView) findViewById(R.id.tvResponsesCount)).setText("48");
+        applySystemBarInsets();
 
-        // Encabezado del menú lateral
-        View header = navView.getHeaderView(0);
-        if (header != null) {
-            tvHeaderName = header.findViewById(R.id.tvHeaderName);
-            tvHeaderEmail = header.findViewById(R.id.tvHeaderEmail);
-            tvHeaderAvatar = header.findViewById(R.id.tvHeaderAvatar);
-        }
-
-        actualizarDatosUsuario();
-
-        // Abrir menú con el icono de hamburguesa
-        toolbar.setNavigationOnClickListener(v ->
-                drawerLayout.openDrawer(GravityCompat.START));
-
-        // Opciones del menú lateral
-        navView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.nav_profile) {
-                openProfile();
-            } else if (id == R.id.nav_logout) {
-                logout();
-            }
-            drawerLayout.closeDrawer(GravityCompat.START);
-            return true;
-        });
-
-        // Tarjetas del dashboard
-        findViewById(R.id.cardPerfil).setOnClickListener(v -> openProfile());
-        findViewById(R.id.cardNueva).setOnClickListener(v ->
-                Toast.makeText(this, "Nueva encuesta pendiente", Toast.LENGTH_SHORT).show());
-        findViewById(R.id.cardLista).setOnClickListener(v ->
-                Toast.makeText(this, "Lista de encuestas pendiente", Toast.LENGTH_SHORT).show());
-
-        // Cerrar sesión
-        findViewById(R.id.btnLogout).setOnClickListener(v -> logout());
-
-        // Botón atrás: si el menú está abierto, lo cierra primero
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                } else {
-                    setEnabled(false);
-                    getOnBackPressedDispatcher().onBackPressed();
-                }
-            }
-        });
-    }
-
-    private void actualizarDatosUsuario() {
-        if (tvGreeting != null) {
-            tvGreeting.setText("Hola, " + UserManager.getFirstName(this));
-        }
-        if (tvHeaderName != null) {
-            tvHeaderName.setText(UserManager.getName(this));
-        }
-        if (tvHeaderEmail != null) {
-            tvHeaderEmail.setText(UserManager.getEmail(this));
-        }
-        if (tvHeaderAvatar != null) {
-            tvHeaderAvatar.setText(UserManager.getInitials(this));
-        }
+        setupTabs();
+        setupChart();
+        setupBottomNavigation();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        actualizarDatosUsuario();
+        applyActivePalette();
     }
 
-    private void openProfile() {
-        Intent i = new Intent(this, PerfilActivity.class);
-        startActivity(i);
+    private void applyActivePalette() {
+        PaletteTheme.apply(this);
+    }
+
+    private void setupToolbarMenu() {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.inflateMenu(R.menu.toolbar_menu);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_settings) {
+                openSettings();
+                return true;
+            }
+            if (item.getItemId() == R.id.action_logout) {
+                logout();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(MainActivity.this, ConfiguracionActivity.class);
+        intent.setClass(MainActivity.this, ConfiguracionActivity.class);
+        try {
+            startActivity(intent);
+        } catch (RuntimeException error) {
+            Toast.makeText(this, "No se pudo abrir Configuración",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void applySystemBarInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.dashboardRoot),
+                (view, insets) -> {
+                    Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    view.setPadding(view.getPaddingLeft(), systemBars.top,
+                            view.getPaddingRight(), systemBars.bottom);
+                    return insets;
+                });
+        ViewCompat.requestApplyInsets(findViewById(R.id.dashboardRoot));
+    }
+
+    private void setupTabs() {
+        TabLayout tabs = findViewById(R.id.dashboardTabs);
+        ViewPager2 pager = findViewById(R.id.dashboardPager);
+        pager.setAdapter(new DashboardPagerAdapter(this));
+        new TabLayoutMediator(tabs, pager,
+                (tab, position) -> tab.setText(position == 0 ? "Encuestas vigentes" : "Inicios de sesión"))
+                .attach();
+    }
+
+    private void setupChart() {
+        BarChart chart = findViewById(R.id.quickChart);
+        List<BarEntry> entries = new ArrayList<>();
+        entries.add(new BarEntry(0, 120));
+        entries.add(new BarEntry(1, 85));
+        entries.add(new BarEntry(2, 40));
+
+        BarDataSet dataSet = new BarDataSet(entries, "Respuestas");
+        dataSet.setColor(Color.rgb(87, 164, 219));
+        dataSet.setDrawValues(false);
+        chart.setData(new BarData(dataSet));
+        chart.getAxisLeft().setTextColor(Color.rgb(107, 114, 128));
+        chart.getAxisRight().setEnabled(false);
+        chart.getXAxis().setTextColor(Color.rgb(107, 114, 128));
+        chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getXAxis().setGranularity(1f);
+        chart.getXAxis().setLabelCount(3);
+        chart.getLegend().setEnabled(false);
+        Description description = new Description();
+        description.setText("");
+        chart.setDescription(description);
+        chart.setFitBars(true);
+        chart.setPinchZoom(false);
+        chart.setDoubleTapToZoomEnabled(false);
+        chart.getAxisLeft().setGridColor(Color.LTGRAY);
+        chart.getXAxis().setGridColor(Color.TRANSPARENT);
+        chart.invalidate();
+    }
+
+    private void setupBottomNavigation() {
+        BottomNavigationView navigation = findViewById(R.id.bottomNavigation);
+        navigation.setSelectedItemId(R.id.nav_home);
+        navigation.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                return true;
+            }
+            if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, PerfilActivity.class));
+                return true;
+            }
+            Toast.makeText(this, "Sección disponible próximamente", Toast.LENGTH_SHORT).show();
+            navigation.setSelectedItemId(R.id.nav_home);
+            return false;
+        });
     }
 
     private void logout() {
@@ -122,8 +163,8 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ignored) {
         }
 
-        Intent i = new Intent(this, LoginActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }

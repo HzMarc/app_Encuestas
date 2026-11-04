@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_dark">#0F1115</color>
+    <color name="card_bg">#1B2028</color>
+    <color name="card_border">#6B7280</color>
+    <color name="input_bg">#1B2028</color>
+    <color name="input_border">#6B7280</color>
+    <color name="primary_blue">#57A4DB</color>
+    <color name="primary_blue_dark">#57A4DB</color>
+    <color name="blue_link">#57A4DB</color>
+    <color name="logo_blue_bg">#57A4DB</color>
+    <color name="avatar_bg">#1B2028</color>
+    <color name="avatar_text">#57A4DB</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_gray">#A5ADBA</color>
+    <color name="text_dark_gray">#A5ADBA</color>
+    <color name="logout_border">#6B7280</color>
+    <color name="logout_text">#A5ADBA</color>
+    <color name="logout_bg">#1B2028</color>
+    <color name="black">#FF0F1115</color>
+    <color name="white">#FF1B2028</color>
+</resources>

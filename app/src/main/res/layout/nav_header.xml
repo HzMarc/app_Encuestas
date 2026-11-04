@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#0B0F19"
+    android:background="@color/white"
     android:orientation="vertical"
     android:padding="20dp">
 
@@ -13,7 +13,7 @@
         android:background="@drawable/bg_avatar"
         android:gravity="center"
         android:text="U"
-        android:textColor="#5B8DEF"
+        android:textColor="@color/primary_blue"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="María López"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold" />
 
@@ -32,6 +32,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="maria.lopez@alcaldia.gob"
-        android:textColor="#94A3B8"
+        android:textColor="@color/text_gray"
         android:textSize="13sp" />
 </LinearLayout>
