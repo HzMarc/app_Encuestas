@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Palette -->
+    <color name="bg_dark">#0D131E</color>
+    <color name="card_bg">#161F2E</color>
+    <color name="card_border">#233044</color>
+    <color name="input_bg">#182232</color>
+    <color name="input_border">#28364D</color>
+
+    <!-- Accent / Primary -->
+    <color name="primary_blue">#5384F7</color>
+    <color name="primary_blue_dark">#3B6FD8</color>
+    <color name="blue_link">#5390FF</color>
+    <color name="logo_blue_bg">#5384F7</color>
+    <color name="avatar_bg">#1C2B46</color>
+    <color name="avatar_text">#60A5FA</color>
+
+    <!-- Text colors -->
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_gray">#94A3B8</color>
+    <color name="text_dark_gray">#64748B</color>
+
+    <!-- Red Logout button -->
+    <color name="logout_border">#E55353</color>
+    <color name="logout_text">#FF6B6B</color>
+    <color name="logout_bg">#1B1724</color>
+
+    <!-- Standard -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

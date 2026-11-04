@@ -1,0 +1,40 @@
+<resources>
+    <style name="Theme.App_Encuestas" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">#5B8DEF</item>
+        <item name="colorOnPrimary">#111827</item>
+        <item name="colorSurface">#111827</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+        <item name="android:windowBackground">#0B0F19</item>
+    </style>
+
+    <style name="App.TextInput" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">#5B8DEF</item>
+        <item name="hintTextColor">#94A3B8</item>
+        <item name="android:textColorHint">#94A3B8</item>
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+    </style>
+
+    <style name="App.Button" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">#5B8DEF</item>
+        <item name="android:textColor">#111827</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="App.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="strokeColor">#334155</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="App.Button.Danger" parent="App.Button.Outlined">
+        <item name="android:textColor">#F87171</item>
+        <item name="strokeColor">#F87171</item>
+    </style>
+</resources>

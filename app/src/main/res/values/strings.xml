@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">App Encuestas</string>
+
+    <!-- Google OAuth / Firebase Web Client ID -->
+    <string name="default_web_client_id" translatable="false">YOUR_DEFAULT_WEB_CLIENT_ID</string>
+
+    <!-- Login Screen -->
+    <string name="login_welcome">Bienvenido</string>
+    <string name="login_subtitle">Inicia sesión para administrar las encuestas de la Alcaldía.</string>
+    <string name="label_email">Correo electrónico</string>
+    <string name="label_password">Contraseña</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="btn_login">Iniciar sesión</string>
+    <string name="divider_or">o</string>
+    <string name="btn_google">Continuar con Google</string>
+    <string name="footer_oauth">Autenticación segura con OAuth 2.0</string>
+    <string name="error_invalid_credentials">Correo o contraseña incorrectos</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_title">Mi perfil</string>
+    <string name="section_personal_data">Datos personales</string>
+    <string name="label_name">Nombre</string>
+    <string name="label_associated_email">Correo asociado a la cuenta</string>
+    <string name="btn_save_changes">Guardar cambios</string>
+    <string name="section_change_password">Cambiar contraseña</string>
+    <string name="label_current_password">Contraseña actual</string>
+    <string name="label_new_password">Nueva contraseña</string>
+    <string name="hint_min_8_chars">Mínimo 8 caracteres</string>
+    <string name="btn_update_password">Actualizar contraseña</string>
+    <string name="btn_logout">Cerrar sesión</string>
+    <string name="msg_changes_saved">Cambios guardados con éxito</string>
+    <string name="msg_password_updated">Contraseña actualizada con éxito</string>
+    <string name="msg_password_too_short">La nueva contraseña debe tener al menos 8 caracteres</string>
+    <string name="msg_incorrect_current_password">La contraseña actual es incorrecta</string>
+    <string name="msg_logged_out">Sesión cerrada</string>
+</resources>
