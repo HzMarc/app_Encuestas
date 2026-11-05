@@ -35,6 +35,9 @@ public class PerfilActivity extends AppCompatActivity {
         TextInputEditText etEmail = findViewById(R.id.etEmail);
         TextInputEditText etCurrent = findViewById(R.id.etCurrent);
         TextInputEditText etNew = findViewById(R.id.etNew);
+        ScreenChrome.setup(this, findViewById(R.id.profileRoot), toolbar, R.id.nav_profile);
+        toolbar.setNavigationIcon(null);
+        toolbar.setNavigationOnClickListener(null);
 
         // Cargar datos del usuario actual desde UserManager
         tvProfileName.setText(UserManager.getName(this));
@@ -42,9 +45,6 @@ public class PerfilActivity extends AppCompatActivity {
         tvProfileAvatar.setText(UserManager.getInitials(this));
         etName.setText(UserManager.getName(this));
         etEmail.setText(UserManager.getEmail(this));
-
-        // Flecha para volver al dashboard
-        toolbar.setNavigationOnClickListener(v -> finish());
 
         // Guardar datos personales
         findViewById(R.id.btnSave).setOnClickListener(v -> {

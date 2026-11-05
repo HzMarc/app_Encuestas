@@ -9,12 +9,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class DashboardSurveyAdapter extends RecyclerView.Adapter<DashboardSurveyAdapter.SurveyViewHolder> {
     private final List<DashboardSurvey> surveys;
 
     public DashboardSurveyAdapter(List<DashboardSurvey> surveys) {
-        this.surveys = surveys;
+        this.surveys = new ArrayList<>(surveys);
+    }
+
+    public void replaceItems(List<DashboardSurvey> items) {
+        surveys.clear();
+        surveys.addAll(items);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -27,6 +34,10 @@ public class DashboardSurveyAdapter extends RecyclerView.Adapter<DashboardSurvey
 
     @Override
     public void onBindViewHolder(@NonNull SurveyViewHolder holder, int position) {
+        if (holder.itemView.getContext() instanceof android.app.Activity) {
+            PaletteTheme.applyToView(holder.itemView,
+                    (android.app.Activity) holder.itemView.getContext());
+        }
         DashboardSurvey survey = surveys.get(position);
         holder.title.setText(survey.getTitle());
         holder.subtitle.setText(survey.getSubtitle());

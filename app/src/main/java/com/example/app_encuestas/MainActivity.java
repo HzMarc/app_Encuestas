@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
         setupToolbarMenu();
         ((TextView) findViewById(R.id.tvActiveCount)).setText("12");
-        ((TextView) findViewById(R.id.tvResponsesCount)).setText("48");
         applySystemBarInsets();
 
         setupTabs();
@@ -52,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         applyActivePalette();
+        LoginHistoryStore.loadTodayCount(this, count ->
+                ((TextView) findViewById(R.id.tvResponsesCount)).setText(String.valueOf(count)));
     }
 
     private void applyActivePalette() {
@@ -60,8 +61,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupToolbarMenu() {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(null);
+        LogoManager.loadInto(this, findViewById(R.id.toolbarAppLogo));
         toolbar.inflateMenu(R.menu.toolbar_menu);
         toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_users) {
+                startActivity(new Intent(this, UsersActivity.class));
+                return true;
+            }
             if (item.getItemId() == R.id.action_settings) {
                 openSettings();
                 return true;
@@ -90,7 +97,10 @@ public class MainActivity extends AppCompatActivity {
                 (view, insets) -> {
                     Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
                     view.setPadding(view.getPaddingLeft(), systemBars.top,
-                            view.getPaddingRight(), systemBars.bottom);
+                            view.getPaddingRight(), 0);
+                    BottomNavigationView navigation = findViewById(R.id.bottomNavigation);
+                    navigation.setPadding(navigation.getPaddingLeft(), navigation.getPaddingTop(),
+                            navigation.getPaddingRight(), systemBars.bottom);
                     return insets;
                 });
         ViewCompat.requestApplyInsets(findViewById(R.id.dashboardRoot));
@@ -143,7 +153,19 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
             if (id == R.id.nav_profile) {
-                startActivity(new Intent(this, PerfilActivity.class));
+                ScreenChrome.navigate(this, new Intent(this, PerfilActivity.class));
+                return true;
+            }
+            if (id == R.id.nav_surveys) {
+                ScreenChrome.navigate(this, new Intent(this, SurveyManagementActivity.class));
+                return true;
+            }
+            if (id == R.id.nav_history) {
+                ScreenChrome.navigate(this, new Intent(this, SurveyHistoryActivity.class));
+                return true;
+            }
+            if (id == R.id.nav_statistics) {
+                ScreenChrome.navigate(this, new Intent(this, StatisticsActivity.class));
                 return true;
             }
             Toast.makeText(this, "Sección disponible próximamente", Toast.LENGTH_SHORT).show();

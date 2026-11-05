@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.App_Encuestas.Launcher" parent="Theme.App_Encuestas">
+        <item name="android:windowSplashScreenBackground">@color/white</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo_encuestas</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/white</item>
+    </style>
+</resources>

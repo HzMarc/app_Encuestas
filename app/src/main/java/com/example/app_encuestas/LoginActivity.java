@@ -1,9 +1,14 @@
 package com.example.app_encuestas;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,6 +45,12 @@ public class LoginActivity extends AppCompatActivity {
 
         etLoginEmail = findViewById(R.id.etLoginEmail);
         etLoginPassword = findViewById(R.id.etLoginPassword);
+        ImageView logo = findViewById(R.id.ivLoginLogo);
+        LogoManager.loadInto(this, logo);
+        String systemName = PaletteManager.getName(this);
+        ((TextView) findViewById(R.id.tvLoginAppName)).setText(systemName);
+        ((TextView) findViewById(R.id.tvLoginSubtitle)).setText(
+                getString(R.string.login_subtitle, systemName));
 
         // Configurar Google Sign-In
         try {
@@ -74,6 +85,16 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        if (!hasValidatedInternetConnection()) {
+            if (!Patterns.EMAIL_ADDRESS.matcher(userInput).matches()) {
+                Toast.makeText(this, "Sin internet, ingresa el correo de la sesión verificada en este dispositivo.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            continueWithCachedSession(userInput);
+            return;
+        }
+
         if (TextUtils.isEmpty(password)) {
             etLoginPassword.setError("Ingresa tu contraseña");
             etLoginPassword.requestFocus();
@@ -100,18 +121,19 @@ public class LoginActivity extends AppCompatActivity {
                                         ? user.getDisplayName()
                                         : UserManager.deriveNameFromInput(finalEmail);
 
-                                UserManager.saveUser(LoginActivity.this, finalName, finalEmail);
-                                Toast.makeText(LoginActivity.this, "Bienvenido " + finalName, Toast.LENGTH_SHORT).show();
-
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
+                                completeLogin(finalName, finalEmail,
+                                        user == null ? null : user.getUid());
                             } else {
-                                ingresarExitoso(userOrEmail);
+                                Toast.makeText(LoginActivity.this,
+                                        "No se pudo iniciar sesión. Revisa el correo y la contraseña.",
+                                        Toast.LENGTH_LONG).show();
                             }
                         });
                 return;
-            } catch (Exception ignored) {
+            } catch (Exception error) {
+                Toast.makeText(this, "No se pudo iniciar sesión con Firebase.",
+                        Toast.LENGTH_LONG).show();
+                return;
             }
         }
 
@@ -119,12 +141,61 @@ public class LoginActivity extends AppCompatActivity {
         ingresarExitoso(userOrEmail);
     }
 
+    private boolean hasValidatedInternetConnection() {
+        ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (manager == null) return false;
+        Network network = manager.getActiveNetwork();
+        if (network == null) return false;
+        NetworkCapabilities capabilities = manager.getNetworkCapabilities(network);
+        return capabilities != null
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+    }
+
+    private void continueWithCachedSession(String email) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String authenticatedEmail = user == null ? null : user.getEmail();
+        if (user == null || authenticatedEmail == null
+                || !email.equalsIgnoreCase(authenticatedEmail)
+                || !LoginHistoryStore.hasLocallyVerifiedActiveAccount(this, authenticatedEmail)) {
+            Toast.makeText(this,
+                    "No hay una sesión activa verificada para ese correo. Conéctate a internet e inicia sesión.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String name = user.getDisplayName() == null || user.getDisplayName().trim().isEmpty()
+                ? UserManager.deriveNameFromInput(authenticatedEmail) : user.getDisplayName();
+        UserManager.saveUser(this, name, authenticatedEmail);
+        LoginHistoryStore.recordLogin(this, user.getUid(), name, authenticatedEmail);
+        Toast.makeText(this, "Sesión sin conexión · Bienvenido " + name, Toast.LENGTH_SHORT).show();
+        openMainActivity();
+    }
+
     private void ingresarExitoso(String userOrEmail) {
         String name = UserManager.deriveNameFromInput(userOrEmail);
         String email = userOrEmail.contains("@") ? userOrEmail : userOrEmail.toLowerCase() + "@alcaldia.gob.sv";
-        UserManager.saveUser(this, name, email);
+        completeLogin(name, email, null);
+    }
 
-        Toast.makeText(LoginActivity.this, "Bienvenido " + name, Toast.LENGTH_SHORT).show();
+    private void completeLogin(String name, String email, String uid) {
+        LoginHistoryStore.checkAccountActive(this, uid, email, active -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (!active) {
+                if (uid != null && !uid.trim().isEmpty()) FirebaseAuth.getInstance().signOut();
+                Toast.makeText(this,
+                        "La cuenta está desactivada o no se pudo verificar. Contacta al administrador.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            UserManager.saveUser(this, name, email);
+            LoginHistoryStore.recordLogin(this, uid, name, email);
+            Toast.makeText(LoginActivity.this, "Bienvenido " + name, Toast.LENGTH_SHORT).show();
+            openMainActivity();
+        });
+    }
+
+    private void openMainActivity() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
@@ -197,12 +268,7 @@ public class LoginActivity extends AppCompatActivity {
                                 ? user.getDisplayName()
                                 : UserManager.deriveNameFromInput(email);
 
-                        UserManager.saveUser(LoginActivity.this, name, email);
-                        Toast.makeText(LoginActivity.this, "Bienvenido " + name, Toast.LENGTH_SHORT).show();
-
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                        completeLogin(name, email, user == null ? null : user.getUid());
                     } else {
                         Toast.makeText(LoginActivity.this, "Error al autenticar con Firebase", Toast.LENGTH_SHORT).show();
                     }

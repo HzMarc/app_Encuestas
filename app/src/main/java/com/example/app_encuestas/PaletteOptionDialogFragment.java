@@ -21,6 +21,8 @@ public class PaletteOptionDialogFragment extends DialogFragment {
     private static final String ARG_NAME = "name";
     private static final String ARG_COLORS = "colors";
     private static final String ARG_DELETABLE = "deletable";
+    private boolean deleteConfirmationOpen;
+    private boolean paletteDeleted;
 
     public static PaletteOptionDialogFragment newInstance(String name, String[] colors,
                                                          boolean deletable) {
@@ -62,7 +64,7 @@ public class PaletteOptionDialogFragment extends DialogFragment {
             row.setGravity(android.view.Gravity.CENTER_VERTICAL);
             row.setPadding(dp(10), dp(7), dp(10), dp(7));
             GradientDrawable rowBackground = new GradientDrawable();
-            rowBackground.setColor(0xFFF6F8FA);
+            rowBackground.setColor(PaletteTheme.surfaceColor(requireActivity()));
             rowBackground.setCornerRadius(dp(14));
             row.setBackground(rowBackground);
 
@@ -87,7 +89,7 @@ public class PaletteOptionDialogFragment extends DialogFragment {
 
             TextView hex = new TextView(requireContext());
             hex.setText(selectedColors[i].toUpperCase());
-            hex.setTextColor(0xFF657180);
+            hex.setTextColor(0xFF0F1115);
             hex.setTextSize(12);
             hex.setGravity(Gravity.CENTER_VERTICAL);
             row.addView(hex, new LinearLayout.LayoutParams(
@@ -107,6 +109,7 @@ public class PaletteOptionDialogFragment extends DialogFragment {
 
         android.app.Dialog dialog = builder.create();
         dialog.setOnShowListener(ignored -> {
+            PaletteTheme.applyToDialog(dialog, requireActivity());
             Button useButton = dialog.findViewById(android.R.id.button1);
             if (useButton != null) {
                 useButton.setOnClickListener(v -> {
@@ -119,7 +122,11 @@ public class PaletteOptionDialogFragment extends DialogFragment {
             }
             Button deleteButton = dialog.findViewById(android.R.id.button3);
             if (deleteButton != null) {
-                deleteButton.setOnClickListener(v -> confirmDelete(name, selectedColors));
+                deleteButton.setOnClickListener(v -> {
+                    if (!isAdded() || deleteConfirmationOpen || paletteDeleted) return;
+                    deleteButton.setEnabled(false);
+                    confirmDelete(name, selectedColors, deleteButton);
+                });
             }
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setLayout((int) (getResources().getDisplayMetrics().widthPixels
@@ -129,19 +136,31 @@ public class PaletteOptionDialogFragment extends DialogFragment {
         return dialog;
     }
 
-    private void confirmDelete(String name, String[] colors) {
-        new MaterialAlertDialogBuilder(requireContext())
+    private void confirmDelete(String name, String[] colors, Button deleteButton) {
+        if (!isAdded() || deleteConfirmationOpen || paletteDeleted) return;
+        deleteConfirmationOpen = true;
+        android.app.Dialog confirmation = new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Eliminar paleta")
                 .setMessage("¿Eliminar «" + name + "»? Esta acción no se puede deshacer.")
                 .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Eliminar", (confirmation, which) -> {
+                .setPositiveButton("Eliminar", (action, which) -> {
                     if (PaletteManager.deleteCustomPalette(requireContext(), name, colors)) {
+                        paletteDeleted = true;
                         getParentFragmentManager().setFragmentResult(
                                 "palette_deleted_result", new Bundle());
                         dismiss();
                     }
                 })
-                .show();
+                .create();
+        confirmation.setOnShowListener(ignored ->
+                PaletteTheme.applyToDialog(confirmation, requireActivity()));
+        confirmation.setOnDismissListener(ignored -> {
+            deleteConfirmationOpen = false;
+            if (!paletteDeleted && isAdded() && deleteButton.isAttachedToWindow()) {
+                deleteButton.setEnabled(true);
+            }
+        });
+        confirmation.show();
     }
 
     private int dp(int value) {

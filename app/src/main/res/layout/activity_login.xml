@@ -14,29 +14,37 @@
         android:orientation="vertical"
         android:padding="24dp">
 
+        <ImageView
+            android:id="@+id/ivLoginLogo"
+            android:layout_width="104dp"
+            android:layout_height="104dp"
+            android:contentDescription="Logo del sistema"
+            android:scaleType="fitCenter" />
+
         <TextView
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_logo"
-            android:gravity="center"
-            android:text="✓"
-            android:textColor="@color/white"
-            android:textSize="28sp" />
+            android:id="@+id/tvLoginAppName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="18dp"
             android:text="Bienvenido"
             android:textColor="@color/black"
             android:textSize="26sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvLoginSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Inicia sesión para administrar las encuestas de la Alcaldía."
+            android:text="Inicia sesión para administrar el sistema."
             android:textColor="@color/text_gray"
             android:textSize="15sp" />
 
@@ -61,9 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="Contraseña"
-            app:endIconMode="password_toggle"
-            app:helperText="Contraseña estática de prueba: 123456"
-            app:helperTextTextColor="@color/text_gray">
+            app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etLoginPassword"
@@ -97,7 +103,12 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="16dp"
-            android:text="Continuar con Google" />
+            android:text="Continuar con Google"
+            app:icon="@drawable/ic_google"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconSize="22dp"
+            app:iconTint="@null" />
 
         <TextView
             android:layout_width="match_parent"

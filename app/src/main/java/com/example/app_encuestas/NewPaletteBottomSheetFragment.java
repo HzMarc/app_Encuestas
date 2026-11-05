@@ -9,10 +9,13 @@ import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
@@ -44,11 +47,45 @@ public class NewPaletteBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        if (getView() != null) {
+            PaletteTheme.applyToView(getView(), requireActivity());
+        }
+        if (getDialog() instanceof com.google.android.material.bottomsheet.BottomSheetDialog) {
+            com.google.android.material.bottomsheet.BottomSheetDialog dialog =
+                    (com.google.android.material.bottomsheet.BottomSheetDialog) getDialog();
+            setCancelable(false);
+            dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
+            View sheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (sheet != null) sheet.setBackgroundColor(PaletteTheme.surfaceColor(requireActivity()));
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                dialog.getWindow().setSoftInputMode(
+                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+                WindowInsetsControllerCompat bars = new WindowInsetsControllerCompat(
+                        dialog.getWindow(), dialog.getWindow().getDecorView());
+                bars.show(WindowInsetsCompat.Type.statusBars()
+                        | WindowInsetsCompat.Type.navigationBars());
+            }
+            com.google.android.material.bottomsheet.BottomSheetBehavior<?> behavior =
+                    dialog.getBehavior();
+            behavior.setFitToContents(false);
+            behavior.setHalfExpandedRatio(0.82f);
+            behavior.setSkipCollapsed(true);
+            behavior.setHideable(false);
+            behavior.setDraggable(false);
+            behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HALF_EXPANDED);
+        }
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle state) {
         super.onViewCreated(view, state);
         String[] initial = requireArguments().getStringArray(ARG_COLORS);
         palette = initial == null || initial.length != 4
-                ? new String[]{"#FFFFFF", "#0F1115", "#6B7280", "#57A4DB"}
+                ? new String[]{"#FFFFFF", "#0F1115", "#0F1115", "#57A4DB"}
                 : initial.clone();
         nameInput = view.findViewById(R.id.newPaletteName);
         nameInput.setText("Mi paleta " + (PaletteManager.getCustomPalettes(requireContext()).length + 1));
@@ -68,8 +105,10 @@ public class NewPaletteBottomSheetFragment extends BottomSheetDialogFragment {
         }
 
         MaterialButton save = view.findViewById(R.id.saveNewPalette);
-        updateActionStyle(view);
+        MaterialButton cancel = view.findViewById(R.id.cancelNewPalette);
+        updateActionStyle();
         save.setOnClickListener(v -> savePalette());
+        cancel.setOnClickListener(v -> dismiss());
     }
 
     private void addColorField(LinearLayout parent, int role) {
@@ -100,6 +139,9 @@ public class NewPaletteBottomSheetFragment extends BottomSheetDialogFragment {
         input.setSingleLine(true);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
                 | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        input.setImeOptions(role < PaletteManager.ROLES.length - 1
+                ? android.view.inputmethod.EditorInfo.IME_ACTION_NEXT
+                : android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
         input.setTextColor(0xFF0F1115);
         input.setHintTextColor(0xFF6B7280);
         input.setText(palette[role]);
@@ -114,11 +156,11 @@ public class NewPaletteBottomSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String value = s.toString().trim().toUpperCase();
+                if (input.getError() != null) input.setError(null);
                 if (PaletteManager.isValidHex(value)) {
                     palette[role] = value;
-                    input.setError(null);
                     updateSwatch(role);
-                    updateActionStyle(requireView());
+                    updateActionStyle();
                 }
             }
 
@@ -126,9 +168,6 @@ public class NewPaletteBottomSheetFragment extends BottomSheetDialogFragment {
             public void afterTextChanged(android.text.Editable editable) { }
         });
 
-        input.setOnFocusChangeListener((v, focused) -> {
-            if (!focused) updateColor(role);
-        });
         updateSwatch(role);
         LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -143,7 +182,7 @@ public class NewPaletteBottomSheetFragment extends BottomSheetDialogFragment {
             palette[role] = value;
             inputs[role].setError(null);
             updateSwatch(role);
-            updateActionStyle(requireView());
+            updateActionStyle();
             return true;
         } else {
             inputs[role].setError("Código HEX inválido");
@@ -183,7 +222,9 @@ public class NewPaletteBottomSheetFragment extends BottomSheetDialogFragment {
         dismiss();
     }
 
-    private void updateActionStyle(View root) {
+    private void updateActionStyle() {
+        View root = getView();
+        if (root == null) return;
         MaterialButton save = root.findViewById(R.id.saveNewPalette);
         if (save == null || palette == null) return;
         int accent = PaletteManager.color(palette[3], Color.BLUE);

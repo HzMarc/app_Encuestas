@@ -14,7 +14,8 @@ public final class PaletteManager {
     private static final String ACTIVE = "active_palette";
     private static final String ACTIVE_MIGRATED = "active_palette_v2_migrated";
     private static final String CUSTOM = "custom_palettes";
-    private static final String[] DEFAULTS = {"#FFFFFF", "#0F1115", "#6B7280", "#57A4DB"};
+    private static final String[] DEFAULTS = {"#FFFFFF", "#0F1115", "#0F1115", "#57A4DB"};
+    private static final String[] LEGACY_DEFAULTS = {"#FFFFFF", "#0F1115", "#6B7280", "#57A4DB"};
     private static final String[] BUILT_IN = {"#FFF8F1", "#5B2C3F", "#62545A", "#E39A43"};
     private static final String[] ATARDECER = {"#FFF7ED", "#7C2D12", "#44403C", "#F97316"};
 
@@ -35,6 +36,13 @@ public final class PaletteManager {
             stored = join(DEFAULTS);
             preferences.edit()
                     .putString(ACTIVE, stored)
+                    .putBoolean(ACTIVE_MIGRATED, true)
+                    .apply();
+            return DEFAULTS.clone();
+        }
+        if (stored != null && stored.equals(join(LEGACY_DEFAULTS))) {
+            preferences.edit()
+                    .putString(ACTIVE, join(DEFAULTS))
                     .putBoolean(ACTIVE_MIGRATED, true)
                     .apply();
             return DEFAULTS.clone();

@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,8 +14,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App_Encuestas">
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/primary_blue" />
         <activity
             android:name=".LoginActivity"
+            android:theme="@style/Theme.App_Encuestas.Launcher"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,8 +30,21 @@
             </intent-filter>
         </activity>
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <activity
             android:name=".MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UsersActivity"
             android:exported="false" />
         <activity
             android:name=".PerfilActivity"
@@ -29,6 +52,27 @@
 
         <activity
             android:name=".ConfiguracionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SurveyManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CreateSurveyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditSurveyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SurveyHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CategorySurveysActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ExportPreviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StatisticsActivity"
             android:exported="false" />
     </application>
 

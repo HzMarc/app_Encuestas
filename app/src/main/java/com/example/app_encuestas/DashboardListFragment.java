@@ -16,6 +16,7 @@ import java.util.List;
 
 public class DashboardListFragment extends Fragment {
     private static final String ARG_TAB = "tab";
+    private DashboardSurveyAdapter adapter;
 
     public static DashboardListFragment newInstance(int tab) {
         DashboardListFragment fragment = new DashboardListFragment();
@@ -38,7 +39,35 @@ public class DashboardListFragment extends Fragment {
         RecyclerView recycler = view.findViewById(R.id.dashboardRecycler);
         recycler.setNestedScrollingEnabled(false);
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recycler.setAdapter(new DashboardSurveyAdapter(createMockSurveys()));
+        int tab = getArguments() == null ? 0 : getArguments().getInt(ARG_TAB, 0);
+        adapter = new DashboardSurveyAdapter(tab == 0
+                ? createMockSurveys() : new ArrayList<>());
+        recycler.setAdapter(adapter);
+        if (tab == 1) loadRecentLogins();
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        if (getArguments() != null && getArguments().getInt(ARG_TAB, 0) == 1) {
+            loadRecentLogins();
+        }
+    }
+
+    private void loadRecentLogins() {
+        if (adapter == null || !isAdded()) return;
+        LoginHistoryStore.loadRecent(requireActivity(), records -> {
+            if (!isAdded() || adapter == null) return;
+            List<DashboardSurvey> items = new ArrayList<>();
+            for (LoginHistoryStore.UserRecord record : records) {
+                items.add(new DashboardSurvey(record.name,
+                        record.email + " · " + record.formattedDate()));
+            }
+            if (items.isEmpty()) {
+                items.add(new DashboardSurvey("Aún no hay inicios de sesión",
+                        "Los accesos recientes aparecerán aquí."));
+            }
+            adapter.replaceItems(items);
+        });
     }
 
     private List<DashboardSurvey> createMockSurveys() {

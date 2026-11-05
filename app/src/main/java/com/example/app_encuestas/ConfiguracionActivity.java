@@ -4,16 +4,20 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.Arrays;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -26,6 +30,8 @@ import com.google.android.material.textfield.TextInputEditText;
 public class ConfiguracionActivity extends AppCompatActivity {
     private String[] activePalette;
     private TextInputEditText nameInput;
+    private ImageView logoPreview;
+    private ActivityResultLauncher<String[]> logoPicker;
 
     @Override
     protected void onResume() {
@@ -36,19 +42,36 @@ public class ConfiguracionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        logoPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+            if (uri == null) return;
+            try {
+                getContentResolver().takePersistableUriPermission(uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (RuntimeException ignored) { }
+            LogoManager.saveLogoUri(this, uri);
+            refreshLogoPreview();
+            Toast.makeText(this, "Logo actualizado", Toast.LENGTH_SHORT).show();
+        });
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_configuracion);
 
         View root = findViewById(R.id.settingsRoot);
         ViewCompat.setOnApplyWindowInsetsListener(root, (view, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            view.setPadding(view.getPaddingLeft(), bars.top, view.getPaddingRight(), bars.bottom);
+            view.setPadding(view.getPaddingLeft(), bars.top, view.getPaddingRight(), 0);
+            View scroll = findViewById(R.id.settingsScroll);
+            scroll.setPadding(scroll.getPaddingLeft(), scroll.getPaddingTop(),
+                    scroll.getPaddingRight(), bars.bottom);
             return insets;
         });
 
         MaterialToolbar toolbar = findViewById(R.id.settingsToolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
         nameInput = findViewById(R.id.etSystemName);
+        logoPreview = findViewById(R.id.systemLogoPreview);
+        findViewById(R.id.btnChangeLogo).setOnClickListener(view ->
+                logoPicker.launch(new String[]{"image/*"}));
+        refreshLogoPreview();
         nameInput.setText(PaletteManager.getName(this));
         PaletteManager.removeCustomPalettesNamed(this, "Atardecer");
         activePalette = PaletteManager.getActivePalette(this);
@@ -109,7 +132,12 @@ public class ConfiguracionActivity extends AppCompatActivity {
 
     private void applyConfigurationPalette() {
         PaletteTheme.apply(this);
+        refreshLogoPreview();
         refreshPalettes();
+    }
+
+    private void refreshLogoPreview() {
+        if (logoPreview != null) LogoManager.loadInto(this, logoPreview);
     }
 
     private void addPaletteCard(LinearLayout container, String name, String[] palette,
@@ -120,7 +148,7 @@ public class ConfiguracionActivity extends AppCompatActivity {
         card.setStrokeWidth(dp(selected ? 2 : 1));
         int accent = PaletteManager.color(activePalette[3], 0xFF57A4DB);
         card.setStrokeColor(selected ? accent : 0xFFE5E9EF);
-        card.setCardBackgroundColor(selected ? 0xFFF8FBFF : Color.WHITE);
+        card.setCardBackgroundColor(PaletteTheme.surfaceColor(this));
         card.setClickable(true);
         card.setFocusable(true);
         card.setRippleColor(android.content.res.ColorStateList.valueOf(0x180F1115));
@@ -165,8 +193,14 @@ public class ConfiguracionActivity extends AppCompatActivity {
         cardParams.bottomMargin = dp(10);
         container.addView(card, cardParams);
 
-        card.setOnClickListener(v -> PaletteOptionDialogFragment.newInstance(name, palette, deletable)
-                .show(getSupportFragmentManager(), "palette_options"));
+        card.setOnClickListener(v -> {
+            androidx.fragment.app.FragmentManager manager = getSupportFragmentManager();
+            if (manager.isStateSaved() || manager.findFragmentByTag("palette_options") != null) {
+                return;
+            }
+            PaletteOptionDialogFragment.newInstance(name, palette, deletable)
+                    .show(manager, "palette_options");
+        });
     }
 
     private int dp(int value) {

@@ -17,12 +17,12 @@
 
     <!-- Text colors -->
     <color name="text_white">#FFFFFF</color>
-    <color name="text_gray">#6B7280</color>
-    <color name="text_dark_gray">#6B7280</color>
+    <color name="text_gray">#0F1115</color>
+    <color name="text_dark_gray">#0F1115</color>
 
     <!-- Secondary/logout button -->
     <color name="logout_border">#6B7280</color>
-    <color name="logout_text">#6B7280</color>
+    <color name="logout_text">#0F1115</color>
     <color name="logout_bg">#FFFFFF</color>
 
     <!-- Standard -->

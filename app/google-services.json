@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "630799194653",
-    "project_id": "app-encuestas-b2fd2",
-    "storage_bucket": "app-encuestas-b2fd2.firebasestorage.app"
+    "project_number": "449088193898",
+    "project_id": "encuestas-513704",
+    "storage_bucket": "encuestas-513704.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:630799194653:android:d6c5f6382de2dfbd0444f4",
+        "mobilesdk_app_id": "1:449088193898:android:de800b55b6528a0cce1113",
         "android_client_info": {
           "package_name": "com.example.app_encuestas"
         }
       },
       "oauth_client": [
         {
-          "client_id": "630799194653-7ff60ovdknp9cd6u5qlv8fhm2rqh71qc.apps.googleusercontent.com",
+          "client_id": "449088193898-om2ohqnt9bckd02rt43rblhu48mqi1rl.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.app_encuestas",
-            "certificate_hash": "712b025bd55a26459a68b0b8f7af8f13f9e36063"
+            "certificate_hash": "32e4696b2cf447e54bac8dba217eb7023bf53114"
           }
         },
         {
-          "client_id": "630799194653-7cj5v0m1f7juo7075rs1u8avdh5ugnup.apps.googleusercontent.com",
+          "client_id": "449088193898-3ebla75h363aa2ia1raij942ufvgn3pc.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBqPd4okRpjQiZa9t5st6TkvBqPx0cg0DM"
+          "current_key": "AIzaSyCY4-cHWq9g4UayTo6Ake2NiNlurjAaJ7M"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "630799194653-7cj5v0m1f7juo7075rs1u8avdh5ugnup.apps.googleusercontent.com",
+              "client_id": "449088193898-3ebla75h363aa2ia1raij942ufvgn3pc.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
